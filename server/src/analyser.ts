@@ -109,17 +109,17 @@ export default class Analyzer {
   }
 
   public async getExplainshellDocumentation({
-    pos,
+    params,
     endpoint,
   }: {
-    pos: LSP.TextDocumentPositionParams
+    params: LSP.TextDocumentPositionParams
     endpoint: string
   }): Promise<any> {
     const leafNode = this.uriToTreeSitterTrees[
-      pos.textDocument.uri
+      params.textDocument.uri
     ].rootNode.descendantForPosition({
-      row: pos.position.line,
-      column: pos.position.character,
+      row: params.position.line,
+      column: params.position.character,
     })
 
     // explainshell needs the whole command, not just the "word" (tree-sitter
@@ -129,7 +129,7 @@ export default class Analyzer {
     // encounters newlines.
     const interestingNode = leafNode.type === 'word' ? leafNode.parent : leafNode
 
-    const cmd = this.uriToFileContent[pos.textDocument.uri].slice(
+    const cmd = this.uriToFileContent[params.textDocument.uri].slice(
       interestingNode.startIndex,
       interestingNode.endIndex,
     )
@@ -153,7 +153,7 @@ export default class Analyzer {
       return { ...response, status: 'error' }
     } else {
       const offsetOfMousePointerInCommand =
-        this.uriToTextDocument[pos.textDocument.uri].offsetAt(pos.position) -
+        this.uriToTextDocument[params.textDocument.uri].offsetAt(params.position) -
         interestingNode.startIndex
 
       const match = explainshellResponse.matches.find(
